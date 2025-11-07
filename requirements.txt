@@ -1,0 +1,25 @@
+# Core ML deps
+numpy
+pandas
+scikit-learn
+iterative-stratification
+
+# Hugging Face ecosystem
+transformers
+accelerate
+safetensors
+tokenizers
+huggingface-hub
+tqdm
+filelock
+packaging
+requests
+
+# Optional: needed for some models (e.g., deberta-v3, many multilingual)
+sentencepiece
+
+# PyTorch (CUDA 12.1 wheel)
+torch==2.*+cu121
+torchvision==0.*+cu121
+torchaudio==2.*+cu121
+--extra-index-url https://download.pytorch.org/whl/cu121
