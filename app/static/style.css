@@ -1,0 +1,173 @@
+:root {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --bg: #f1f5f9;
+  --panel: #ffffff;
+  --panel-border: #cbd5f5;
+  --text: #0f172a;
+  --muted: #475569;
+  --chip-bg: rgba(37, 99, 235, 0.12);
+  --chip-text: #1d4ed8;
+  --table-border: #e2e8f0;
+  --table-header: #f8fafc;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body.dark {
+  --bg: #0f172a;
+  --panel: #1e293b;
+  --panel-border: #334155;
+  --text: #e2e8f0;
+  --muted: #cbd5f5;
+  --chip-bg: rgba(147, 197, 253, 0.2);
+  --chip-text: #bfdbfe;
+  --table-border: #334155;
+  --table-header: #1f2937;
+}
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  text-align: left;
+  gap: 1rem;
+}
+
+.hero h1 {
+  margin-bottom: 0.5rem;
+}
+
+.input-card,
+.result-card {
+  background: var(--panel);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid transparent;
+}
+
+body.dark .input-card,
+body.dark .result-card {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+textarea {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  padding: 1rem;
+  font-size: 1rem;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+button {
+  appearance: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+  background: #2563eb;
+  color: #fff;
+  transition: background 0.2s ease;
+}
+
+button.secondary {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+body.dark button.secondary {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-text {
+  font-size: 1rem;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--chip-text);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.chip.muted {
+  background: #e2e8f0;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text);
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--table-border);
+  font-size: 0.95rem;
+}
+
+th {
+  font-weight: 600;
+  background: var(--table-header);
+}

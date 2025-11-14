@@ -6,12 +6,15 @@ from dataclasses import asdict, dataclass
 from inspect import signature
 from typing import Dict, List, Sequence
 
+os.environ["TRANSFORMERS_NO_TF"] = "1"  # avoid TensorFlow deps when using PyTorch-only workflow
+
 import numpy as np
 import pandas as pd
 import torch
 from iterstrat.ml_stratifiers import MultilabelStratifiedShuffleSplit
 from sklearn.metrics import classification_report, f1_score, precision_recall_curve
 from torch.utils.data import DataLoader, Dataset
+
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
@@ -20,16 +23,16 @@ from transformers import (
     TrainingArguments,
 )
 
-# =========================
-# Constants / Defaults
-# =========================
-LABELS = ["admiration", "amusement", "gratitude", "love", "pride", "relief", "remorse"]
-TEXT_COL = "text"
-
-DEFAULT_MODEL = "distilbert-base-uncased"
-DEFAULT_MAX_LEN = 256
-DEFAULT_TRAIN_PATH = "train.csv"
-DEFAULT_EVAL_PATH = "dev.csv"
+from emotion_config import (
+    DEFAULT_ARTIFACT_DIR,
+    DEFAULT_EVAL_PATH,
+    DEFAULT_MAX_LEN,
+    DEFAULT_MODEL,
+    DEFAULT_TRAIN_PATH,
+    LABELS,
+    TEXT_COL,
+)
+from emotion_inference import EmotionPredictor
 
 
 @dataclass
@@ -48,7 +51,7 @@ class TrainConfig:
     val_size: float = 0.15
     train_path: str = DEFAULT_TRAIN_PATH
     eval_path: str = DEFAULT_EVAL_PATH
-    output_dir: str = "artifacts"
+    output_dir: str = DEFAULT_ARTIFACT_DIR
     hf_output_dir: str = "runs/emotion_clf"
 
 
@@ -329,55 +332,14 @@ def train_and_eval(cfg: TrainConfig) -> Dict[str, float]:
     return {"f1_micro": micro, "f1_macro": macro}
 
 
-def load_model_and_predict(texts: Sequence[str], artifact_dir: str = "artifacts") -> pd.DataFrame:
-    if not texts:
-        return pd.DataFrame(columns=LABELS)
-
-    model_dir = os.path.join(artifact_dir, "model")
-    tokenizer = AutoTokenizer.from_pretrained(model_dir)
-    model = AutoModelForSequenceClassification.from_pretrained(model_dir)
-    with open(os.path.join(artifact_dir, "thresholds.json"), "r") as f:
-        thresholds = json.load(f)
-    max_length = DEFAULT_MAX_LEN
-    config_path = os.path.join(artifact_dir, "config.json")
-    if os.path.exists(config_path):
-        with open(config_path, "r") as f:
-            stored_cfg = json.load(f)
-            max_length = stored_cfg.get("max_length", max_length)
-
-    class _InferenceDataset(Dataset):
-        def __init__(self, tokenizer, texts, max_len):
-            self.tokenizer = tokenizer
-            self.texts = list(texts)
-            self.max_len = max_len
-
-        def __len__(self):
-            return len(self.texts)
-
-        def __getitem__(self, idx):
-            return self.tokenizer(
-                self.texts[idx],
-                truncation=True,
-                padding=False,
-                max_length=self.max_len,
-            )
-
-    dataset = _InferenceDataset(tokenizer, texts, max_length)
-    collator = DataCollatorWithPadding(tokenizer=tokenizer)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
-    probs = predict_proba(model, dataset, collator, batch_size=32)
-    preds = binarize_with_thresholds(probs, thresholds)
-    return pd.DataFrame(preds, columns=LABELS)
-
-
 def main():
     cfg = parse_args()
     metrics = train_and_eval(cfg)
     print("\nSaved artifacts to:", cfg.output_dir)
     print("Metrics:", metrics)
     sample_text = ["Thanks for the reply! I appreciate your input. Please keep me in the loop, I'd love to be more active with this if possible."]
-    sample_pred = load_model_and_predict(sample_text, cfg.output_dir)
+    predictor = EmotionPredictor(cfg.output_dir)
+    sample_pred = predictor.predict_dataframe(sample_text)
     print("\nSample prediction:\n", pd.concat([pd.Series(sample_text, name=TEXT_COL), sample_pred], axis=1))
 
 

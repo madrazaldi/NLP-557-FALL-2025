@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Emotion Explorer</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <div>
+          <h1>Emotion Explorer</h1>
+          <p>Type any snippet of text and see which of the seven emotions the fine-tuned model detects.</p>
+        </div>
+        <button id="theme-toggle" class="secondary">Dark mode</button>
+      </section>
+
+      <section class="input-card">
+        <label for="text-input">Input text</label>
+        <textarea id="text-input" rows="5" placeholder="Paste text here..."></textarea>
+        <div class="actions">
+            <button id="predict-btn">Predict emotions</button>
+            <button id="clear-btn" class="secondary">Clear</button>
+        </div>
+      </section>
+
+      <section class="results" id="results"></section>
+    </main>
+
+    <template id="result-template">
+      <div class="result-card">
+        <p class="input-text"></p>
+        <div class="chips"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Emotion</th>
+              <th>Probability</th>
+              <th>Predicted?</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </template>
+
+    <script>
+      const predictBtn = document.getElementById("predict-btn");
+      const clearBtn = document.getElementById("clear-btn");
+      const inputEl = document.getElementById("text-input");
+      const resultsEl = document.getElementById("results");
+      const template = document.getElementById("result-template");
+      const themeToggle = document.getElementById("theme-toggle");
+
+      const preferredTheme = localStorage.getItem("theme");
+      if (preferredTheme === "dark") {
+        document.body.classList.add("dark");
+        themeToggle.textContent = "Light mode";
+      }
+
+      themeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark");
+        const isDark = document.body.classList.contains("dark");
+        themeToggle.textContent = isDark ? "Light mode" : "Dark mode";
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+      });
+
+      clearBtn.addEventListener("click", () => {
+        inputEl.value = "";
+        resultsEl.innerHTML = "";
+      });
+
+      predictBtn.addEventListener("click", async () => {
+        const text = inputEl.value.trim();
+        if (!text) {
+          alert("Please enter some text.");
+          return;
+        }
+        predictBtn.disabled = true;
+        predictBtn.textContent = "Predicting...";
+        try {
+          const resp = await fetch("/api/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          });
+          if (!resp.ok) {
+            throw new Error("Prediction failed");
+          }
+          const data = await resp.json();
+          renderResults(data.results);
+        } catch (err) {
+          console.error(err);
+          alert("Something went wrong. Check the server logs for details.");
+        } finally {
+          predictBtn.disabled = false;
+          predictBtn.textContent = "Predict emotions";
+        }
+      });
+
+      function renderResults(results) {
+        resultsEl.innerHTML = "";
+        results.forEach((result) => {
+          const clone = template.content.cloneNode(true);
+          clone.querySelector(".input-text").textContent = result.text;
+
+          const chips = clone.querySelector(".chips");
+          Object.entries(result.predictions).forEach(([label, value]) => {
+            if (value) {
+              const chip = document.createElement("span");
+              chip.className = "chip";
+              chip.textContent = label;
+              chips.appendChild(chip);
+            }
+          });
+          if (!chips.children.length) {
+            const chip = document.createElement("span");
+            chip.className = "chip muted";
+            chip.textContent = "No emotions detected";
+            chips.appendChild(chip);
+          }
+
+          const tbody = clone.querySelector("tbody");
+          result.ranked.forEach((item) => {
+            const row = document.createElement("tr");
+            const prob = item.score.toFixed(3);
+            row.innerHTML = `
+              <td>${item.label}</td>
+              <td>${prob}</td>
+              <td>${item.predicted ? "Yes" : "No"}</td>
+            `;
+            tbody.appendChild(row);
+          });
+
+          resultsEl.appendChild(clone);
+        });
+      }
+    </script>
+  </body>
+</html>
