@@ -80,14 +80,14 @@ class EmotionPredictor:
         return out
 
     def predict_dataframe(self, texts: Sequence[str]) -> pd.DataFrame:
-        if not texts:
+        if len(texts) == 0:
             return pd.DataFrame(columns=LABELS)
         probs = self._predict_proba(texts)
         preds = self._binarize(probs)
         return pd.DataFrame(preds, columns=LABELS)
 
     def predict_with_probs(self, texts: Sequence[str]) -> Dict[str, List[Dict[str, float]]]:
-        if not texts:
+        if len(texts) == 0:
             return {"predictions": [], "probabilities": []}
         probs = self._predict_proba(texts)
         preds = self._binarize(probs)

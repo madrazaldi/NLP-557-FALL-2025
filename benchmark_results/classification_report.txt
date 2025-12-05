@@ -1,0 +1,14 @@
+              precision    recall  f1-score   support
+
+  admiration       0.74      0.88      0.80       488
+   amusement       0.86      0.84      0.85       303
+   gratitude       0.96      0.89      0.92       358
+        love       0.79      0.90      0.84       252
+       pride       0.80      0.53      0.64        15
+      relief       0.67      0.22      0.33        18
+     remorse       0.88      0.90      0.89        68
+
+   micro avg       0.82      0.87      0.84      1502
+   macro avg       0.81      0.74      0.75      1502
+weighted avg       0.83      0.87      0.84      1502
+ samples avg       0.39      0.39      0.39      1502
