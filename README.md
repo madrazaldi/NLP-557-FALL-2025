@@ -5,7 +5,7 @@ A full workflow for multi-label emotion detection using Hugging Face transformer
 - **Training pipeline** (`main.py`) that fine-tunes a sequence classifier on seven emotions (admiration, amusement, gratitude, love, pride, relief, remorse) using the provided `train.csv` / `dev.csv`.
 - **Benchmark evaluation** (`benchmark.py`) for comprehensive model performance evaluation without requiring retraining.
 - **Reusable inference module** (`emotion_inference.py`) plus shared config (`emotion_config.py`).
-- **Notebook for Analysis** (`NLP_Assignment_Competitions.ipynb`): A comprehensive notebook for EDA and experimentation, likely used for assignment submissions or competition entries.
+- **Notebook for Analysis** (`NLP_Assignment_Competitions.ipynb`): A comprehensive notebook for EDA and experimentation.
 - **FastAPI + Jinja frontend** (`app/`) that lets you test the trained model via a simple UI, with Docker support for easy deployment.
 
 ## Quick Start
@@ -45,7 +45,7 @@ The bind mount ensures the container sees your trained model. Set `ARTIFACT_DIR`
 
 ```
 main.py                # training CLI (HF Trainer + metrics + artifact saving)
-NLP_Assignment_Competitions.ipynb # EDA and competition submission notebook
+NLP_Assignment_Competitions.ipynb # notebook
 benchmark.py           # comprehensive model evaluation without retraining
 emotion_config.py      # shared constants / defaults
 emotion_inference.py   # EmotionPredictor helper used by CLI + API
